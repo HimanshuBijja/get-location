@@ -6,8 +6,10 @@ import Location from "@/components/Location";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { BadgeAlert } from "lucide-react";
+import LocationFetcher from "@/components/Location";
 
 export default function Home() {
+    const [loading, setLoading] = useState(false);
     const [location, setLocation] = useState<{
         lat: number;
         lon: number;
@@ -102,58 +104,33 @@ export default function Home() {
         requestLocation();
     };
 
-    const handleSkipLocation = () => {
-        setShowLocationPrompt(false);
-        setLocationError(null);
-        // You can set a default location or continue without location
-        setLocation({ lat: 0, lon: 0 }); // or handle this case differently
-    };
+
 
     if (showLocationPrompt || locationError) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-                    <div className="text-center">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-                            <BadgeAlert color="red"/>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            Permission Required
-                        </h3>
-                        {/* <p className="text-sm text-gray-500 mb-6">
-                             
-                            {locationError && (
-                                <span className="block mt-2 text-red-600">{locationError}</span>
-                            )}
-                        </p> */}
-                        <div className="space-y-3">
-                            <button
-                                onClick={handleRetryLocation}
-                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                Click Here
-                            </button>
-                            {/* <button
-                                onClick={handleSkipLocation}
-                                className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
-                            >
-                                Skip for Now
-                            </button> */}
-                        </div>
-                        <div className="mt-4 text-xs text-gray-400">
-                            <p>If you previously denied browser permission:</p>
-                            {/* <p>• Click the location icon in your browser's address bar</p> */}
-                            <p>• Select "Allow" and refresh the page</p>
-                        </div>
-                    </div>
-                </div>
+            <LocationFetcher handleRetryLocation={handleRetryLocation} />
+        );
+    }
+
+
+    useEffect(() => {
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 5000);
+    }, []);
+    
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="loader"></div>
             </div>
         );
     }
 
     return (
         <>
-            {location ? <Home1 /> : <p>Loading location...</p>}
+            {location && <Home1 />}
             {/* <ContactForm /> */}
             {/* <Location /> */}
         </>
