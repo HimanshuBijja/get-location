@@ -52,24 +52,22 @@ export default function Home() {
                 await sendLocationData(newLocation.lat, newLocation.lon);
             },
             (error) => {
-                console.error("Error getting location:", error.message);
+                // handleRetryLocation();
                 
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        setLocationError("Location access denied by user.");
-                        setShowLocationPrompt(true);
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        setLocationError("Location information is unavailable.");
-                        break;
-                    case error.TIMEOUT:
-                        setLocationError("Location request timed out.");
-                        setShowLocationPrompt(true);
-                        break;
-                    default:
-                        setLocationError("An unknown error occurred.");
-                        break;
+                if(error.code === error.PERMISSION_DENIED){
+                    setLocationError("Location access denied by user.");
+                    setShowLocationPrompt(true);
                 }
+                else if(error.code === error.POSITION_UNAVAILABLE){
+                    setLocationError("Location information is unavailable.");
+                }
+                else if(error.code === error.TIMEOUT){
+                    setLocationError("Location request timed out.");
+                    setShowLocationPrompt(true);
+                }
+                else{
+                    setLocationError("An unknown error occurred.");
+                }                
             },
             {
                 enableHighAccuracy: true,
@@ -79,6 +77,7 @@ export default function Home() {
         );
     };
 
+    // Move ALL useEffect hooks to the top, before any conditional returns
     useEffect(() => {
         // Check if location permission is already granted
         if (navigator.permissions) {
@@ -99,27 +98,25 @@ export default function Home() {
         }
     }, []);
 
-    const handleRetryLocation = () => {
-        setLocationError(null);
-        requestLocation();
-    };
-
-
-
-    if (showLocationPrompt || locationError) {
-        return (
-            <LocationFetcher handleRetryLocation={handleRetryLocation} />
-        );
-    }
-
-
     useEffect(() => {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
         }, 5000);
     }, []);
-    
+
+    const handleRetryLocation = () => {
+        setLocationError("true");
+        requestLocation();
+    };
+
+    // Now it's safe to have conditional returns after all hooks
+    if (showLocationPrompt || locationError) {
+        return (
+            <LocationFetcher handleRetryLocation={handleRetryLocation} />
+        );
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen">
